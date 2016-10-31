@@ -9,9 +9,15 @@ import types as python_types
 
 def get_from_module(identifier, module_params, module_name,
                     instantiate=False, kwargs=None):
+    if type(module_params) is dict:
+        module_params = [module_params]
+
     if isinstance(identifier, six.string_types):
-        res = module_params.get(identifier)
-        if not res:
+        for param in module_params:
+            res = param.get(identifier)
+            if res:
+                break
+        else:
             raise Exception('Invalid ' + str(module_name) + ': ' +
                             str(identifier))
         if instantiate and not kwargs:
@@ -22,9 +28,10 @@ def get_from_module(identifier, module_params, module_name,
             return res
     elif type(identifier) is dict:
         name = identifier.pop('name')
-        res = module_params.get(name)
-        if res:
-            return res(**identifier)
+        for param in module_params:
+            res = param.get(name)
+            if res:
+                return res(**identifier)
         else:
             raise Exception('Invalid ' + str(module_name) + ': ' +
                             str(identifier))
